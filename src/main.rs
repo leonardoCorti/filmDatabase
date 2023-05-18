@@ -1,29 +1,49 @@
-use druid::widget::{Button, Flex, Label, TextBox};
-use druid::{AppLauncher, LocalizedString, PlatformError, Widget, WidgetExt, WindowDesc, Data, Lens};
+#![windows_subsystem = "windows"]
+#![allow(non_snake_case)]
+use druid::widget::{Align, Flex, Label, TextBox};
+use druid::{AppLauncher, Data, Env, Lens, LocalizedString, Widget, WindowDesc, WidgetExt};
 
-fn main() -> Result<(), PlatformError> {
-    let main_window = WindowDesc::new(ui_builder());
-    let data = String::new();
-    let data = AppState { name: "hello world".to_string() };
-    AppLauncher::with_window(main_window)
-        .log_to_console()
-        .launch(data)
-}
+const VERTICAL_WIDGET_SPACING: f64 = 20.0;
+const TEXT_BOX_WIDTH: f64 = 200.0;
+const WINDOW_TITLE: LocalizedString<HelloState> = LocalizedString::new("Film Database");
+
 #[derive(Clone, Data, Lens)]
-struct AppState {
+struct HelloState {
     name: String,
 }
 
-fn ui_builder() -> impl Widget<AppState> {
-    let text_box = TextBox::new()
-        .with_placeholder("Enter text")
-        .lens(AppState::name);
-    let button = Button::new("Submit").on_click(|_,_,_|{
+fn main() {
+    // describe the main window
+    let main_window = WindowDesc::new(root_widget())
+        .title(WINDOW_TITLE)
+        .window_size((400.0, 400.0));
 
-    });
-    Flex::row()
-        .with_child(text_box)
-        .with_spacer(8.0)
-        .with_child(button)
-        .center()
+    // create the initial app state
+    let initial_state = HelloState {
+        name: "World".into(),
+    };
+
+    // start the application
+    AppLauncher::with_window(main_window)
+        .launch(initial_state)
+        .expect("Failed to launch application");
+}
+
+fn root_widget() -> impl Widget<HelloState> {
+    // a label that will determine its text based on the current app data.
+    let label = Label::new(|data: &HelloState, _env: &Env| format!("Hello {}!", data.name));
+    // a textbox that modifies `name`.
+    let textbox = TextBox::new()
+        .with_placeholder("Who are we greeting?")
+        .fix_width(TEXT_BOX_WIDTH)
+        .lens(HelloState::name);
+
+    // arrange the two widgets vertically, with some padding
+    let layout = Flex::row()
+        .with_child(label)
+        .with_spacer(VERTICAL_WIDGET_SPACING)
+        .with_child(textbox);
+
+    // center the two widgets in the available space
+    Align::centered(layout)
 }
