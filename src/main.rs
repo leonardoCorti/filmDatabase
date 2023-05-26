@@ -3,8 +3,8 @@
 use std::fs::File;
 use std::io::Read;
 use serde::{Deserialize, Serialize};
-use druid::widget::{Align, Flex,TextBox, Button};
-use druid::{AppLauncher, Data, Lens, LocalizedString, Widget, WindowDesc, WidgetExt};
+use druid::widget::{Align, Flex,TextBox, Button, Label};
+use druid::{AppLauncher, Data, Lens, LocalizedString, Widget, WindowDesc, WidgetExt, WindowConfig, Size};
 
 const WINDOW_TITLE: LocalizedString<HelloState> = LocalizedString::new("Film Database");
 
@@ -12,6 +12,7 @@ const WINDOW_TITLE: LocalizedString<HelloState> = LocalizedString::new("Film Dat
 struct HelloState {
     name: String,
     api_key: Option<String>,
+    api_user: String,
 }
 #[derive(Deserialize, Serialize)]
 struct Config{
@@ -33,6 +34,7 @@ fn main() {
     let initial_state = HelloState {
         name: "".into(),
         api_key,
+        api_user: "".into(),
     };
 
     // start the application
@@ -67,7 +69,29 @@ fn top_bar() -> impl Widget<HelloState> + 'static {
 
     let button_long_add = Button::new("add film")
         .fix_width(100.)
-        .on_click(|_, _data: &mut HelloState, _: &_| ());
+        .on_click(|ctx, data: &mut HelloState, env| {
+            match data.api_key{
+                Some(_) => todo!(),
+                None => {
+                    let label_message = Label::new("please add the api key");
+                    let tb = TextBox::new().fix_size(500.,30.).lens(HelloState::api_user);
+                    let button_close = Button::new("confirm key")
+                        .fix_width(100.)
+                        .on_click(|_,_,_|{
+
+                        } );
+                    let column = Flex::column()
+                        .with_child(label_message)
+                        .with_child(tb)
+                        .with_child(button_close);
+                    ctx.new_sub_window(
+                        WindowConfig::default()
+                            .window_size(Size::new(700.,200.))
+                            .set_level(druid::WindowLevel::AppWindow), 
+                            column, data.clone(), env.clone());
+                },
+            }
+        });
 
     Flex::row()
         .with_flex_child(textbox, 1.0)
