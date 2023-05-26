@@ -1,4 +1,3 @@
-#![windows_subsystem = "windows"]
 #![allow(non_snake_case)]
 use std::fs::File;
 use std::io::{Read, Write};
@@ -17,6 +16,23 @@ struct HelloState {
 #[derive(Deserialize, Serialize)]
 struct Config{
     api_key: String,
+}
+
+#[derive(Deserialize, Serialize)]
+struct SearchResults{
+    id: String,
+    resultType: String,
+    image: String,
+    title: String,
+    description: String,
+}
+
+#[derive(Deserialize, Serialize)]
+struct FilmList{
+    searchType: String,
+    expression: String,
+    results: Vec<SearchResults>,
+    errorMessage: String,
 }
 
 fn main() {
@@ -65,7 +81,9 @@ fn top_bar() -> impl Widget<HelloState> + 'static {
 
     let button_quick_add = Button::new("quick add")
         .fix_width(100.)
-        .on_click(|_, _data: &mut HelloState, _: &_| ());
+        .on_click(|_, data: &mut HelloState, _: &_| {
+            list_of_films(data.api_key.as_ref().unwrap(), &data.name);           
+        });
 
     let button_long_add = Button::new("add film")
         .fix_width(100.)
@@ -115,4 +133,11 @@ fn read_api_key() -> Result<String,std::io::Error> {
 
     let config: Config = serde_json::from_str(&config_content)?;
     Ok(config.api_key)
+}
+
+fn list_of_films(api_key:&str, name: &str) -> Result<FilmList, reqwest::Error> {
+    let request = format!("https://imdb-api.com/it/API/Search/{}/{}",api_key,name);
+    let body = reqwest::blocking::get(request)?.text()?;
+    let list: FilmList = serde_json::from_str(&body).expect("failed to deserialize");
+    Ok(list)
 }
