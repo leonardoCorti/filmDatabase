@@ -1,23 +1,34 @@
 #![windows_subsystem = "windows"]
 #![allow(non_snake_case)]
-use druid::widget::{Align, Flex, Label, TextBox, Button};
-use druid::{AppLauncher, Data, Env, Lens, LocalizedString, Widget, WindowDesc, WidgetExt};
+use std::fs::File;
+use std::io::Read;
+use serde::{Deserialize, Serialize};
+use druid::widget::{Align, Flex,TextBox, Button};
+use druid::{AppLauncher, Data, Lens, LocalizedString, Widget, WindowDesc, WidgetExt};
 
 const WINDOW_TITLE: LocalizedString<HelloState> = LocalizedString::new("Film Database");
 
 #[derive(Clone, Data, Lens)]
 struct HelloState {
     name: String,
+    api_key: String,
 }
+#[derive(Deserialize, Serialize)]
+struct Config{
+    api_key: String,
+}
+
 fn main() {
     // describe the main window
     let main_window = WindowDesc::new(root_widget())
         .title(WINDOW_TITLE)
         .window_size((800.0, 800.0));
 
+    let api_key = read_api_key().unwrap_or("".into());
     // create the initial app state
     let initial_state = HelloState {
-        name: "".into(),
+        name: api_key.clone(),
+        api_key: api_key,
     };
 
     // start the application
@@ -46,14 +57,28 @@ fn top_bar() -> impl Widget<HelloState> + 'static {
         .expand_width()
         .lens(HelloState::name);
 
-    let button = Button::new("add film")
+    let button_quick_add = Button::new("quick add")
         .fix_width(100.)
-        .on_click(|_, data: &mut HelloState, _: &_| ());
+        .on_click(|_, _data: &mut HelloState, _: &_| ());
+
+    let button_long_add = Button::new("add film")
+        .fix_width(100.)
+        .on_click(|_, _data: &mut HelloState, _: &_| ());
 
     Flex::row()
         .with_flex_child(textbox, 1.0)
-        .with_child(button)
+        .with_child(button_quick_add)
+        .with_child(button_long_add)
         .cross_axis_alignment(druid::widget::CrossAxisAlignment::Fill)
         .fix_height(30.)
         .padding(10.)
+}
+
+fn read_api_key() -> Result<String,std::io::Error> {
+    let mut config_file = File::open("config.json")?;
+    let mut config_content = String::new();
+    config_file.read_to_string(&mut config_content)?;
+
+    let config: Config = serde_json::from_str(&config_content)?;
+    Ok(config.api_key)
 }
