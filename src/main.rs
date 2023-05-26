@@ -1,7 +1,7 @@
 #![windows_subsystem = "windows"]
 #![allow(non_snake_case)]
 use std::fs::File;
-use std::io::Read;
+use std::io::{Read, Write};
 use serde::{Deserialize, Serialize};
 use druid::widget::{Align, Flex,TextBox, Button, Label};
 use druid::{AppLauncher, Data, Lens, LocalizedString, Widget, WindowDesc, WidgetExt, WindowConfig, Size};
@@ -77,8 +77,13 @@ fn top_bar() -> impl Widget<HelloState> + 'static {
                     let tb = TextBox::new().fix_size(500.,30.).lens(HelloState::api_user);
                     let button_close = Button::new("confirm key")
                         .fix_width(100.)
-                        .on_click(|_,_,_|{
-
+                        .on_click(|_,data: &mut HelloState,_|{
+                           let config = Config{
+                            api_key:  data.api_user.clone(),
+                           };
+                           let config_content = serde_json::to_string(&config).expect("failed to serialize config.json");
+                           let mut config_file = File::create("config.json").expect("failed to create config.json");
+                           config_file.write_all(config_content.as_bytes()).expect("failed to write to config.json");
                         } );
                     let column = Flex::column()
                         .with_child(label_message)
