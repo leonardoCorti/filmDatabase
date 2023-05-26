@@ -71,7 +71,7 @@ fn top_bar() -> impl Widget<HelloState> + 'static {
         .fix_width(100.)
         .on_click(|ctx, data: &mut HelloState, env| {
             match data.api_key{
-                Some(_) => todo!(),
+                Some(_) => {},
                 None => {
                     let label_message = Label::new("please add the api key");
                     let tb = TextBox::new().fix_size(500.,30.).lens(HelloState::api_user);
@@ -97,7 +97,6 @@ fn top_bar() -> impl Widget<HelloState> + 'static {
                 },
             }
         });
-
     Flex::row()
         .with_flex_child(textbox, 1.0)
         .with_child(button_quick_add)
