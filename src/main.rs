@@ -11,7 +11,7 @@ const WINDOW_TITLE: LocalizedString<HelloState> = LocalizedString::new("Film Dat
 #[derive(Clone, Data, Lens)]
 struct HelloState {
     name: String,
-    api_key: String,
+    api_key: Option<String>,
 }
 #[derive(Deserialize, Serialize)]
 struct Config{
@@ -20,15 +20,19 @@ struct Config{
 
 fn main() {
     // describe the main window
-    let main_window = WindowDesc::new(root_widget())
+    let main_window = WindowDesc::new(homepage())
         .title(WINDOW_TITLE)
         .window_size((800.0, 800.0));
 
-    let api_key = read_api_key().unwrap_or("".into());
+    let api_key = match read_api_key(){
+        Ok(key) => Some(key),
+        Err(_) => None
+    };
+
     // create the initial app state
     let initial_state = HelloState {
-        name: api_key.clone(),
-        api_key: api_key,
+        name: "".into(),
+        api_key,
     };
 
     // start the application
@@ -37,7 +41,7 @@ fn main() {
         .expect("Failed to launch application");
 }
 
-fn root_widget() -> impl Widget<HelloState> {
+fn homepage() -> impl Widget<HelloState> {
 
    let text_placeHolder = TextBox::new()
         .with_placeholder("placeholder")
