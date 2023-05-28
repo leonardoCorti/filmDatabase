@@ -82,7 +82,10 @@ fn top_bar() -> impl Widget<HelloState> + 'static {
     let button_quick_add = Button::new("quick add")
         .fix_width(100.)
         .on_click(|_, data: &mut HelloState, _: &_| {
-            list_of_films(data.api_key.as_ref().unwrap(), &data.name);           
+            let list = list_of_films(data.api_key.as_ref().unwrap(), &data.name);
+            let id = list.unwrap().results.get(0).unwrap().id.clone();
+            println!("{}", id);
+            println!("{:#?}", film_information(data.api_key.as_ref().unwrap(), &id));         
         });
 
     let button_long_add = Button::new("add film")
@@ -140,4 +143,60 @@ fn list_of_films(api_key:&str, name: &str) -> Result<FilmList, reqwest::Error> {
     let body = reqwest::blocking::get(request)?.text()?;
     let list: FilmList = serde_json::from_str(&body).expect("failed to deserialize");
     Ok(list)
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct Film{
+    id: String,
+    title: String,
+    year: String,
+    image: String,
+    releaseDate: String,
+    runtimeMins: String,
+    plot: String,
+    plotLocal: Option<String>,
+    directors: String,
+    writers: String,
+    stars: String,
+    genres: String,
+    companies: String,
+    imDbRating: String,
+    metacriticRating: String,
+    wikipedia: Wikipedia,
+}
+#[derive(Debug, Serialize, Deserialize)]
+struct Wikipedia{
+    url: String,
+}
+impl Film{
+    fn get_stars_list(&self)-> Vec<String>{
+        self.stars.split(",")
+            .map(|name| name.trim().to_string())
+            .collect()
+    }
+
+    fn get_imdbRating(&self) -> u32{
+       let raw_rating: i32 = match self.imDbRating.trim().parse() {
+            Ok(num) => num,
+            Err(_) => 0, 
+        };
+        let correct_rating: u32 = (raw_rating*10).try_into().unwrap();
+        correct_rating
+    }
+    fn get_metacriticRating(&self) -> u32{
+       match self.metacriticRating.trim().parse() {
+            Ok(num) => num,
+            Err(_) => 0, 
+        }
+    }
+    fn get_wikipedia_url(&self) -> String{
+        self.wikipedia.url.to_string()
+    }
+}
+
+fn film_information(api_key: &str, id: &str) -> Result<Film, reqwest::Error> {
+    let request = format!("https://imdb-api.com/it/API/Title/{}/{}/Wikipedia", api_key, id);
+    let body = reqwest::blocking::get(request)?.text()?;
+    let film_info: Film = serde_json::from_str(&body).expect("failed to deserialize film info");
+    Ok(film_info)
 }
