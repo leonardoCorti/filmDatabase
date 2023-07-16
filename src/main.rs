@@ -102,9 +102,12 @@ fn top_bar() -> impl Widget<HelloState> + 'static {
                            let config = Config{
                             api_key:  data.api_user.clone(),
                            };
-                           let config_content = serde_json::to_string(&config).expect("failed to serialize config.json");
-                           let mut config_file = File::create("config.json").expect("failed to create config.json");
-                           config_file.write_all(config_content.as_bytes()).expect("failed to write to config.json");
+                           let config_content = serde_json::to_string(&config)
+                                .expect("failed to serialize config.json");
+                           let mut config_file = File::create("config.json")
+                                .expect("failed to create config.json");
+                           config_file.write_all(config_content.as_bytes())
+                                .expect("failed to write to config.json");
                            data.api_key= Some(data.api_user.clone());
                            ctx.submit_command(Command::new(druid::commands::CLOSE_WINDOW, (), Target::Auto));
                         } );
