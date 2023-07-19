@@ -15,6 +15,7 @@ fn main() {
         println!(" ");
     }
     println!("{:#?}", film_info("tt0083658","6f1e323f"));
+
     // describe the main window
     let main_window = WindowDesc::new(homepage())
         .title(WINDOW_TITLE)

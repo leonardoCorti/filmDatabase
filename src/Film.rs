@@ -25,6 +25,7 @@ pub struct FilmList {
     totalResults: String,
 }
 
+//TODO: add error handling
 pub fn search_film(name: &str, api: &str) -> FilmList {
     let base_url = "http://www.omdbapi.com/";
     let url = format!("{}/?apikey={}&s={}",base_url,api,name.replace(" ", "%20") );
@@ -36,6 +37,7 @@ pub fn search_film(name: &str, api: &str) -> FilmList {
     results
 }
 
+//TODO: add error handling
 pub fn film_info(id: &str, api: &str) -> Film {
     let base_url = "http://www.omdbapi.com/";
     let url = format!("{}/?apikey={}&i={}",base_url,api,id );
