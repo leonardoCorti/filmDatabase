@@ -28,9 +28,9 @@ fn main() {
 
     // create the initial app state
     let initial_state = HelloState {
-        name: "".into(),
-        api_key,
         api_user: "".into(),
+        api_key,
+        text_bar: "".into(),
     };
 
     // start the application

@@ -24,7 +24,6 @@ pub struct FilmList {
     Search: Vec<FilmFromListOmdb>,
     totalResults: String,
 }
-
 //TODO: add error handling
 pub fn search_film(name: &str, api: &str) -> FilmList {
     let base_url = "http://www.omdbapi.com/";
@@ -37,7 +36,6 @@ pub fn search_film(name: &str, api: &str) -> FilmList {
     results
 }
 
-//TODO: add error handling
 pub fn film_info(id: &str, api: &str) -> Film {
     let base_url = "http://www.omdbapi.com/";
     let url = format!("{}/?apikey={}&i={}",base_url,api,id );
