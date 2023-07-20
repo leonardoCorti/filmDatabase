@@ -2,20 +2,11 @@
 use druid::{WindowDesc, LocalizedString, AppLauncher};
 use filmDatabase::*;
 
-use crate::Film::{search_film, film_info};
-
 mod Film;
 
 const WINDOW_TITLE: LocalizedString<HelloState> = LocalizedString::new("Film Database");
 
 fn main() {
-
-    println!("{:#?}", search_film("blade runner", "6f1e323f"));
-    for _ in 0..50 {
-        println!(" ");
-    }
-    println!("{:#?}", film_info("tt0083658","6f1e323f"));
-
     // describe the main window
     let main_window = WindowDesc::new(homepage())
         .title(WINDOW_TITLE)
