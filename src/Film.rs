@@ -1,22 +1,22 @@
 use serde::{Serialize, Deserialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Film{
-    Title: String,
-    Year: String,
-    Released: String,
-    Runtime: String,
-    Genre: String,
-    Metascore: String,
-    Poster: String,
+    pub Title: String,
+    pub Year: String,
+    pub Released: String,
+    pub Runtime: String,
+    pub Genre: String,
+    pub Metascore: String,
+    pub Poster: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct FilmFromListOmdb {
-    Title: String,
-    Year: String,
-    imdbID: String,
-    Poster: String,
+    pub Title: String,
+    pub Year: String,
+    pub imdbID: String,
+    pub Poster: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -24,6 +24,13 @@ pub struct FilmList {
     Search: Vec<FilmFromListOmdb>,
     totalResults: String,
 }
+
+impl FilmList {
+    pub fn get_list(&self) -> &Vec<FilmFromListOmdb> {
+        &self.Search
+    }
+}
+
 //TODO: add error handling
 pub fn search_film(name: &str, api: &str) -> FilmList {
     let base_url = "http://www.omdbapi.com/";

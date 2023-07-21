@@ -3,10 +3,12 @@ use druid::{WindowDesc, LocalizedString, AppLauncher};
 use filmDatabase::*;
 
 mod Film;
+mod Database;
 
 const WINDOW_TITLE: LocalizedString<HelloState> = LocalizedString::new("Film Database");
 
 fn main() {
+
     // describe the main window
     let main_window = WindowDesc::new(homepage())
         .title(WINDOW_TITLE)
@@ -16,7 +18,7 @@ fn main() {
         Ok(key) => Some(key),
         Err(_) => None
     };
-
+    
     // create the initial app state
     let initial_state = HelloState {
         api_user: "".into(),
@@ -29,5 +31,4 @@ fn main() {
         .launch(initial_state)
         .expect("Failed to launch application");
 }
-
 
