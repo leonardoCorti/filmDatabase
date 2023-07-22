@@ -4,7 +4,9 @@ use std::fs::File;
 use std::io::{Read, Write};
 use serde::{Deserialize, Serialize};
 use druid::widget::{Align, Flex,TextBox, Button, Label};
-use druid::{Data, Lens, Widget, WidgetExt, WindowConfig, Size, Command, Target, EventCtx, Env};
+use druid::{Data, Lens, Widget, WidgetExt, WindowConfig, Size, Command, Target, EventCtx, Env, ImageBuf};
+use image;
+const FILE_SIZE: usize = 100000;
 
 #[derive(Clone, Data, Lens)]
 pub struct HelloState {
@@ -26,9 +28,30 @@ pub fn homepage() -> impl Widget<HelloState> {
 
     let layout = Flex::column()
         .with_child(top_bar())
+        .with_child(test_image())
         .with_flex_child(text_placeHolder, 1.0);
 
     Align::centered(layout)
+}
+
+fn test_image() -> impl Widget<HelloState> + 'static {
+
+    let buffer = load_image("media/Blade Runner.jpg");
+    let jpg_data = ImageBuf::from_data(&buffer).unwrap();
+    let img = druid::widget::Image::new(jpg_data)
+        .fill_mode(druid::widget::FillStrat::Fill)
+        .interpolation_mode(druid::piet::InterpolationMode::Bilinear); 
+
+    img
+}
+
+fn load_image(path: &str) -> [u8; FILE_SIZE] {
+
+    let mut jpg_file = std::fs::File::open(path).unwrap();
+    let mut buffer: [u8; FILE_SIZE] = [0; FILE_SIZE];
+    let _ = jpg_file.read(&mut buffer).unwrap();
+
+    buffer
 }
 
 pub fn top_bar() -> impl Widget<HelloState> + 'static {
