@@ -3,7 +3,6 @@ use druid::{WindowDesc, LocalizedString, AppLauncher};
 use filmDatabase::*;
 
 mod Film;
-mod Database;
 
 const WINDOW_TITLE: LocalizedString<HelloState> = LocalizedString::new("Film Database");
 

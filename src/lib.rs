@@ -5,7 +5,9 @@ use std::io::{Read, Write};
 use serde::{Deserialize, Serialize};
 use druid::widget::{Align, Flex,TextBox, Button, Label};
 use druid::{Data, Lens, Widget, WidgetExt, WindowConfig, Size, Command, Target, EventCtx, Env, ImageBuf};
-use image;
+// use image;
+mod Film;
+mod Database;
 const FILE_SIZE: usize = 100000;
 
 #[derive(Clone, Data, Lens)]
@@ -36,13 +38,45 @@ pub fn homepage() -> impl Widget<HelloState> {
 
 fn test_image() -> impl Widget<HelloState> + 'static {
 
-    let buffer = load_image("media/Blade Runner.jpg");
-    let jpg_data = ImageBuf::from_data(&buffer).unwrap();
-    let img = druid::widget::Image::new(jpg_data)
-        .fill_mode(druid::widget::FillStrat::Fill)
-        .interpolation_mode(druid::piet::InterpolationMode::Bilinear); 
+    // let buffer = load_image("media/Blade Runner.jpg");
+    // let jpg_data = ImageBuf::from_data(&buffer).unwrap();
+    // let img = druid::widget::Image::new(jpg_data)
+    //     .fill_mode(druid::widget::FillStrat::Fill)
+    //     .interpolation_mode(druid::piet::InterpolationMode::Bilinear); 
+    // img
 
-    img
+
+    film_row(Database::FilmInDatabase{
+        Title: "Blade Runner".to_string(),
+        Year: "".to_string(),
+        Released: "".to_string(),
+        Runtime: "a lot of time".to_string(),
+        Genre: "noir, cyberpunk".to_string(),
+        Metascore: "".to_string(),
+        Poster: "".to_string(),
+        DateWatched: "".to_string(),
+    })
+}
+
+fn film_row(film: Database::FilmInDatabase) -> impl Widget<HelloState> + 'static {
+
+    let img_data = load_image(&format!("media/{}.jpg",film.Title));
+    let jpg_data = ImageBuf::from_data(&img_data).unwrap();
+    let poster = druid::widget::Image::new(jpg_data)
+        .boxed()
+        .fix_width(100.)
+        .fix_height(300.);
+
+    let title = Label::new(film.Title);
+    let genre = Label::new(film.Genre);
+    
+    let second_part = Flex::column()
+        .with_child(title)
+        .with_child(genre);
+
+    Flex::row()
+        .with_child(poster)
+        .with_child(second_part)
 }
 
 fn load_image(path: &str) -> [u8; FILE_SIZE] {

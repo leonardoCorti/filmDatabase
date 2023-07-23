@@ -15,14 +15,14 @@ pub struct Database{
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct FilmInDatabase {
-    Title: String,
-    Year: String,
-    Released: String,
-    Runtime: String,
-    Genre: String,
-    Metascore: String,
-    Poster: String,
-    DateWatched: String,
+    pub Title: String,
+    pub Year: String,
+    pub Released: String,
+    pub Runtime: String,
+    pub Genre: String,
+    pub Metascore: String,
+    pub Poster: String,
+    pub DateWatched: String,
 }
 
 impl Database {
