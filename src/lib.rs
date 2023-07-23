@@ -2,6 +2,8 @@
 
 use std::fs::File;
 use std::io::{Read, Write};
+use std::path::Path;
+use Database::FilmInDatabase;
 use serde::{Deserialize, Serialize};
 use druid::widget::{Align, Flex,TextBox, Button, Label};
 use druid::{Data, Lens, Widget, WidgetExt, WindowConfig, Size, Command, Target, EventCtx, Env, ImageBuf};
@@ -46,26 +48,30 @@ fn test_image() -> impl Widget<HelloState> + 'static {
     // img
 
 
-    film_row(Database::FilmInDatabase{
-        Title: "Blade Runner".to_string(),
+    film_row(FilmInDatabase{
+        Title: "Blade Runner 2049".to_string(),
         Year: "".to_string(),
         Released: "".to_string(),
         Runtime: "a lot of time".to_string(),
         Genre: "noir, cyberpunk".to_string(),
         Metascore: "".to_string(),
-        Poster: "".to_string(),
+        Poster: "https://m.media-amazon.com/images/M/MV5BNzA1Njg4NzYxOV5BMl5BanBnXkFtZTgwODk5NjU3MzI@._V1_SX300.jpg".to_string(),
         DateWatched: "".to_string(),
     })
 }
 
-fn film_row(film: Database::FilmInDatabase) -> impl Widget<HelloState> + 'static {
+fn film_row(film: FilmInDatabase) -> impl Widget<HelloState> + 'static {
 
-    let img_data = load_image(&format!("media/{}.jpg",film.Title));
+    let path = format!("media/{}.jpg",film.Title);
+    if !Path::new(&path).exists() {
+        download_poster(&film, &path);
+    }
+    let img_data = load_image(&path);
     let jpg_data = ImageBuf::from_data(&img_data).unwrap();
     let poster = druid::widget::Image::new(jpg_data)
         .boxed()
-        .fix_width(100.)
-        .fix_height(300.);
+        .fix_width(200.)
+        .fix_height(600.);
 
     let title = Label::new(film.Title);
     let genre = Label::new(film.Genre);
@@ -77,6 +83,21 @@ fn film_row(film: Database::FilmInDatabase) -> impl Widget<HelloState> + 'static
     Flex::row()
         .with_child(poster)
         .with_child(second_part)
+}
+
+fn download_poster(film: &FilmInDatabase, path: &str) -> Result<(), Box< dyn std::error::Error>> {
+
+    let response = reqwest::blocking::get(&film.Poster)?;
+
+    if !response.status().is_success(){
+        return Err("failed to downlaod image".into());
+    }
+
+    let image_data = response.bytes()?;
+
+    let mut file = File::create(path)?;
+    file.write_all(&image_data)?;
+    Ok(())
 }
 
 fn load_image(path: &str) -> [u8; FILE_SIZE] {
