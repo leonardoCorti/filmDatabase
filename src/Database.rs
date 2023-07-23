@@ -3,17 +3,17 @@ use chrono::prelude::*;
 
 use csv::ReaderBuilder;
 use serde::{Deserialize, Serialize};
-use druid::{im::{vector, Vector}, Data};
+use druid::{im::{vector, Vector}, Data, Lens};
 use crate::Film::Film;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Data, Lens)]
 pub struct Database{
     path: String,
     number_of_films: usize,
     films: Vector<FilmInDatabase>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Data)]
+#[derive(Debug, Serialize, Deserialize, Clone, Data, Lens)]
 pub struct FilmInDatabase {
     pub Title: String,
     pub Year: String,

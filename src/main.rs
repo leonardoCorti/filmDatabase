@@ -6,7 +6,7 @@ mod Film;
 
 const WINDOW_TITLE: LocalizedString<HelloState> = LocalizedString::new("Film Database");
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>>{
 
     // describe the main window
     let main_window = WindowDesc::new(homepage())
@@ -17,17 +17,22 @@ fn main() {
         Ok(key) => Some(key),
         Err(_) => None
     };
+
+    let database = Database::Database::new("films.csv")?;
     
     // create the initial app state
     let initial_state = HelloState {
         api_user: "".into(),
         api_key,
         text_bar: "".into(),
+        database,
     };
 
     // start the application
     AppLauncher::with_window(main_window)
         .launch(initial_state)
         .expect("Failed to launch application");
+
+    Ok(())
 }
 

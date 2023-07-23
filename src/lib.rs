@@ -9,7 +9,7 @@ use druid::widget::{Align, Flex,TextBox, Button, Label};
 use druid::{Data, Lens, Widget, WidgetExt, WindowConfig, Size, Command, Target, EventCtx, Env, ImageBuf};
 // use image;
 mod Film;
-mod Database;
+pub mod Database;
 const FILE_SIZE: usize = 100000;
 
 #[derive(Clone, Data, Lens)]
@@ -17,6 +17,7 @@ pub struct HelloState {
     pub api_user: String,
     pub api_key: Option<String>,
     pub text_bar: String,
+    pub database: Database::Database,
 }
 
 #[derive(Deserialize, Serialize)]
