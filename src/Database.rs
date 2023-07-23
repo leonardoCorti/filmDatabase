@@ -1,4 +1,4 @@
-use std::{path::Path, fs::File, io::Write};
+use std::{path::Path, fs::File, io::Write, result};
 use chrono::prelude::*;
 
 use csv::ReaderBuilder;
@@ -6,11 +6,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::Film::Film;
 
-#[derive(Debug)]
+use druid::Data;
+
+#[derive(Debug, Clone, Data)]
 pub struct Database{
     path: String,
-    number_of_films: usize,
-    films: Vec<FilmInDatabase>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -35,42 +35,10 @@ impl Database {
             file.write(header.as_bytes())?;
         }
 
-        let mut films = Vec::new();
-        let file = File::open(file_path)?;
-        let mut rdr = ReaderBuilder::new().from_reader(file);
-        for result in rdr.deserialize() {
-            let record: FilmInDatabase = result?;
-            films.push(record);
-        }
-        let number_of_films = films.len();
-
-        Ok(Database{
+       Ok(Database{
             path: path.to_string(),
-            number_of_films,
-            films
         })
     }
-
-    pub fn update_database(&self) -> Result<(), Box<dyn std::error::Error>>{
-        let diff = self.films.len() - self.number_of_films;
-        if diff<1 { return Ok(())};
-        let new_films: Vec<FilmInDatabase> = self.films[self.films.len()-diff..].to_vec();
-        let file_database = std::fs::OpenOptions::new()
-            .append(true)
-            .write(true)
-            .open(&self.path)?;
-    
-        let mut wrt = csv::WriterBuilder::new()
-            .has_headers(false)
-            .from_writer(file_database);
-
-        for film in new_films {
-            let _ = wrt.serialize(film)?;
-        } 
-        wrt.flush()?;
-
-        Ok(())
-    } 
 
     pub fn add_a_film(&mut self, the_film: Film) -> Result<(), Box<dyn std::error::Error>>{
         let local: Date<Local> = Local::today();
@@ -85,8 +53,33 @@ impl Database {
             Poster: the_film.Poster,
             DateWatched: DateWatched.to_string(),
         };
-        self.films.push(the_film_in_database);
+        //let films: Vec<FilmInDatabase> = self.get_films();
+        self.write_new_film(the_film_in_database)?;
         Ok(())
+    }
+
+    fn write_new_film(&self, new_film: FilmInDatabase) -> Result<(), Box<dyn std::error::Error>> {
+        let file_database = std::fs::OpenOptions::new()
+            .write(true)
+            .append(true)
+            .open(&self.path)?;
+        let mut wrt = csv::WriterBuilder::new()
+            .has_headers(false)
+            .from_writer(file_database);
+        wrt.serialize(new_film)?;
+        wrt.flush()?;
+        Ok(())
+    }
+
+    pub fn get_films(&self) -> Vec<FilmInDatabase> {
+        let mut films = Vec::new();
+        let file = File::open(&self.path).unwrap();
+        let mut rdr = ReaderBuilder::new().from_reader(file);
+        for result in rdr.deserialize() {
+            let record: FilmInDatabase = result.unwrap();
+            films.push(record);
+        }
+        films
     }
 
  }

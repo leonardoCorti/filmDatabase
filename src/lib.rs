@@ -9,7 +9,8 @@ use druid::widget::{Align, Flex,TextBox, Button, Label};
 use druid::{Data, Lens, Widget, WidgetExt, WindowConfig, Size, Command, Target, EventCtx, Env, ImageBuf};
 // use image;
 mod Film;
-mod Database;
+// mod Database;
+pub mod Database;
 const FILE_SIZE: usize = 100000;
 
 #[derive(Clone, Data, Lens)]
@@ -17,6 +18,7 @@ pub struct HelloState {
     pub api_user: String,
     pub api_key: Option<String>,
     pub text_bar: String,
+    pub database: Database::Database,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -24,7 +26,7 @@ struct Config{
     api_key: String,
 }
 
-pub fn homepage() -> impl Widget<HelloState> {
+pub fn homepage(state: &HelloState) -> impl Widget<HelloState> {
 
    let text_placeHolder = TextBox::new()
         .with_placeholder("placeholder")
@@ -32,13 +34,13 @@ pub fn homepage() -> impl Widget<HelloState> {
 
     let layout = Flex::column()
         .with_child(top_bar())
-        .with_child(test_image())
+        .with_child(test_image(state))
         .with_flex_child(text_placeHolder, 1.0);
 
     Align::centered(layout)
 }
 
-fn test_image() -> impl Widget<HelloState> + 'static {
+fn test_image(data: &HelloState) -> impl Widget<HelloState> + 'static {
 
     // let buffer = load_image("media/Blade Runner.jpg");
     // let jpg_data = ImageBuf::from_data(&buffer).unwrap();
@@ -48,23 +50,30 @@ fn test_image() -> impl Widget<HelloState> + 'static {
     // img
 
 
-    film_row(FilmInDatabase{
-        Title: "Blade Runner 2049".to_string(),
-        Year: "".to_string(),
-        Released: "".to_string(),
-        Runtime: "a lot of time".to_string(),
-        Genre: "noir, cyberpunk".to_string(),
-        Metascore: "".to_string(),
-        Poster: "https://m.media-amazon.com/images/M/MV5BNzA1Njg4NzYxOV5BMl5BanBnXkFtZTgwODk5NjU3MzI@._V1_SX300.jpg".to_string(),
-        DateWatched: "".to_string(),
-    })
+    // film_row(FilmInDatabase{
+    //     Title: "The Whale".to_string(),
+    //     Year: "".to_string(),
+    //     Released: "".to_string(),
+    //     Runtime: "a lot of time".to_string(),
+    //     Genre: "noir, cyberpunk".to_string(),
+    //     Metascore: "".to_string(),
+    //     Poster: "https://m.media-amazon.com/images/M/MV5BZDQ4Njg4YTctNGZkYi00NWU1LWI4OTYtNmNjOWMyMjI1NWYzXkEyXkFqcGdeQXVyMTA3MDk2NDg2._V1_SX300.jpg".to_string(),
+    //     DateWatched: "".to_string(),
+    // })
+
+    let mut column_of_films = Flex::column();
+    for film in data.database.get_films(){
+        column_of_films = column_of_films.with_child(film_row(&film));
+    }
+    column_of_films
 }
 
-fn film_row(film: FilmInDatabase) -> impl Widget<HelloState> + 'static {
+fn film_row(film: &FilmInDatabase) -> impl Widget<HelloState> + 'static {
 
     let path = format!("media/{}.jpg",film.Title);
     if !Path::new(&path).exists() {
-        download_poster(&film, &path);
+        let _ = download_poster(&film, &path);
+        //TODO: should add standard poster if this fails
     }
     let img_data = load_image(&path);
     let jpg_data = ImageBuf::from_data(&img_data).unwrap();
@@ -73,8 +82,8 @@ fn film_row(film: FilmInDatabase) -> impl Widget<HelloState> + 'static {
         .fix_width(200.)
         .fix_height(600.);
 
-    let title = Label::new(film.Title);
-    let genre = Label::new(film.Genre);
+    let title = Label::new(film.Title.clone());
+    let genre = Label::new(film.Genre.clone());
     
     let second_part = Flex::column()
         .with_child(title)
