@@ -3,17 +3,17 @@ use chrono::prelude::*;
 
 use csv::ReaderBuilder;
 use serde::{Deserialize, Serialize};
-
+use druid::{im::{vector, Vector}, Data};
 use crate::Film::Film;
 
 #[derive(Debug)]
 pub struct Database{
     path: String,
     number_of_films: usize,
-    films: Vec<FilmInDatabase>,
+    films: Vector<FilmInDatabase>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Data)]
 pub struct FilmInDatabase {
     pub Title: String,
     pub Year: String,
@@ -43,7 +43,7 @@ impl Database {
             films.push(record);
         }
         let number_of_films = films.len();
-
+        let films: Vector<FilmInDatabase> = films.into();
         Ok(Database{
             path: path.to_string(),
             number_of_films,
@@ -51,10 +51,7 @@ impl Database {
         })
     }
 
-    pub fn update_database(&self) -> Result<(), Box<dyn std::error::Error>>{
-        let diff = self.films.len() - self.number_of_films;
-        if diff<1 { return Ok(())};
-        let new_films: Vec<FilmInDatabase> = self.films[self.films.len()-diff..].to_vec();
+    fn update_database(&self, a_film: FilmInDatabase) -> Result<(), Box<dyn std::error::Error>>{
         let file_database = std::fs::OpenOptions::new()
             .append(true)
             .write(true)
@@ -64,11 +61,8 @@ impl Database {
             .has_headers(false)
             .from_writer(file_database);
 
-        for film in new_films {
-            let _ = wrt.serialize(film)?;
-        } 
+        let _ = wrt.serialize(a_film)?;
         wrt.flush()?;
-
         Ok(())
     } 
 
@@ -85,7 +79,7 @@ impl Database {
             Poster: the_film.Poster,
             DateWatched: DateWatched.to_string(),
         };
-        self.films.push(the_film_in_database);
+        self.films.push_back(the_film_in_database);
         Ok(())
     }
 

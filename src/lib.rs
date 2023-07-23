@@ -149,7 +149,7 @@ pub fn request_api(ctx: &mut EventCtx, data: &mut HelloState, env: &Env) {
         .fix_width(100.)
         .on_click(|ctx,data: &mut HelloState,_|{
             let config = Config{
-                api_key:  data.api_user.clone(),
+                api_key:  data.text_bar.clone(),
             };
 
             let config_content = serde_json::to_string(&config)
