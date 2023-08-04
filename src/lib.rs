@@ -5,7 +5,7 @@ use std::io::{Read, Write};
 use std::path::Path;
 use Database::FilmInDatabase;
 use serde::{Deserialize, Serialize};
-use druid::widget::{Align, Flex,TextBox, Button, Label};
+use druid::widget::{Align, Flex,TextBox, Button, Label, Scroll};
 use druid::{Data, Lens, Widget, WidgetExt, WindowConfig, Size, Command, Target, EventCtx, Env, ImageBuf};
 // use image;
 mod Film;
@@ -42,30 +42,15 @@ pub fn homepage(state: &HelloState) -> impl Widget<HelloState> {
 
 fn test_image(data: &HelloState) -> impl Widget<HelloState> + 'static {
 
-    // let buffer = load_image("media/Blade Runner.jpg");
-    // let jpg_data = ImageBuf::from_data(&buffer).unwrap();
-    // let img = druid::widget::Image::new(jpg_data)
-    //     .fill_mode(druid::widget::FillStrat::Fill)
-    //     .interpolation_mode(druid::piet::InterpolationMode::Bilinear); 
-    // img
-
-
-    // film_row(FilmInDatabase{
-    //     Title: "The Whale".to_string(),
-    //     Year: "".to_string(),
-    //     Released: "".to_string(),
-    //     Runtime: "a lot of time".to_string(),
-    //     Genre: "noir, cyberpunk".to_string(),
-    //     Metascore: "".to_string(),
-    //     Poster: "https://m.media-amazon.com/images/M/MV5BZDQ4Njg4YTctNGZkYi00NWU1LWI4OTYtNmNjOWMyMjI1NWYzXkEyXkFqcGdeQXVyMTA3MDk2NDg2._V1_SX300.jpg".to_string(),
-    //     DateWatched: "".to_string(),
-    // })
 
     let mut column_of_films = Flex::column();
     for film in data.database.get_films(){
-        column_of_films = column_of_films.with_child(film_row(&film));
+        column_of_films = column_of_films.with_child(film_row(&film).fix_width(500.));
     }
-    column_of_films
+    // column_of_films
+    let scrollable = Scroll::new(column_of_films)
+    .vertical();
+    scrollable
 }
 
 fn film_row(film: &FilmInDatabase) -> impl Widget<HelloState> + 'static {
@@ -79,8 +64,7 @@ fn film_row(film: &FilmInDatabase) -> impl Widget<HelloState> + 'static {
     let jpg_data = ImageBuf::from_data(&img_data).unwrap();
     let poster = druid::widget::Image::new(jpg_data)
         .boxed()
-        .fix_width(200.)
-        .fix_height(600.);
+        .fix_width(200.);
 
     let title = Label::new(film.Title.clone());
     let genre = Label::new(film.Genre.clone());
@@ -163,7 +147,7 @@ pub fn request_api(ctx: &mut EventCtx, data: &mut HelloState, env: &Env) {
         .fix_width(100.)
         .on_click(|ctx,data: &mut HelloState,_|{
             let config = Config{
-                api_key:  data.text_bar.clone(),
+                api_key:  data.api_user.clone(),
             };
 
             let config_content = serde_json::to_string(&config)
