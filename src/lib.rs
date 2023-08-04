@@ -129,7 +129,12 @@ pub fn top_bar() -> impl Widget<HelloState> + 'static {
         .fix_width(100.)
         .on_click(|ctx, data: &mut HelloState, env| {
             match &data.api_key{
-                Some(_key) => {},
+                Some(key) => {
+                    let a_film = Film::search_film(&data.text_bar, key).get_list()[0].clone();
+                    let a_film_info = Film::film_info(&a_film.imdbID, key);
+                    let _ = data.database.add_a_film(a_film_info);
+                     
+                },
                 None => request_api(ctx, data, env),
             }
        });

@@ -11,7 +11,7 @@ pub struct Film{
     pub Poster: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct FilmFromListOmdb {
     pub Title: String,
     pub Year: String,
