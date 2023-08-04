@@ -28,14 +28,9 @@ struct Config{
 
 pub fn homepage(state: &HelloState) -> impl Widget<HelloState> {
 
-   let text_placeHolder = TextBox::new()
-        .with_placeholder("placeholder")
-        .lens(HelloState::text_bar);
-
     let layout = Flex::column()
         .with_child(top_bar())
-        .with_child(test_image(state))
-        .with_flex_child(text_placeHolder, 1.0);
+        .with_flex_child(test_image(state), 1.0);
 
     Align::centered(layout)
 }
@@ -45,11 +40,14 @@ fn test_image(data: &HelloState) -> impl Widget<HelloState> + 'static {
 
     let mut column_of_films = Flex::column();
     for film in data.database.get_films(){
-        column_of_films = column_of_films.with_child(film_row(&film).fix_width(500.));
+        column_of_films = column_of_films.with_child(film_row(&film));
     }
     // column_of_films
-    let scrollable = Scroll::new(column_of_films)
-    .vertical();
+    // let scrollable = Scroll::new(column_of_films)
+    // .vertical();
+    // scrollable
+    let scrollable = column_of_films.scroll();
+
     scrollable
 }
 
