@@ -12,6 +12,7 @@ mod Film;
 // mod Database;
 pub mod Database;
 const FILE_SIZE: usize = 100000;
+const PLACEHOLDER_POSTER: &[u8] = include_bytes!("graphics/poster_placeholder.jpg");
 
 #[derive(Clone, Data, Lens)]
 pub struct HelloState {
@@ -53,12 +54,17 @@ fn test_image(data: &HelloState) -> impl Widget<HelloState> + 'static {
 
 fn film_row(film: &FilmInDatabase) -> impl Widget<HelloState> + 'static {
 
-    let path = format!("media/{}.jpg",film.Title.replace("?", ""));
+    let mut path = format!("media/{}.jpg",film.Title.replace("?", ""));
     if !Path::new(&path).exists() {
-        let _ = download_poster(&film, &path);
-        //TODO: should add standard poster if this fails
+        let poster_downloaded = download_poster(&film, &path);
+        if poster_downloaded.is_err() {
+            path = "media/placeholder.jpg".into();
+        }
     }
-    let img_data = load_image(&path);
+    let img_data = match load_image(&path){
+        Ok(data) => data,
+        Err(..) => get_placeholder(),
+    };
     let jpg_data = ImageBuf::from_data(&img_data).unwrap();
     let poster = druid::widget::Image::new(jpg_data)
         .boxed()
@@ -76,6 +82,16 @@ fn film_row(film: &FilmInDatabase) -> impl Widget<HelloState> + 'static {
         .with_child(second_part)
 }
 
+fn get_placeholder() -> [u8; FILE_SIZE] {
+    let path = "media/placeholder.jpg";
+    if !Path::new(path).exists() {
+        let mut file = File::create(path).unwrap();
+        file.write_all(PLACEHOLDER_POSTER).unwrap();
+    }
+
+    load_image(path).unwrap()
+}
+
 fn download_poster(film: &FilmInDatabase, path: &str) -> Result<(), Box< dyn std::error::Error>> {
 
     let response = reqwest::blocking::get(&film.Poster)?;
@@ -91,13 +107,13 @@ fn download_poster(film: &FilmInDatabase, path: &str) -> Result<(), Box< dyn std
     Ok(())
 }
 
-fn load_image(path: &str) -> [u8; FILE_SIZE] {
+fn load_image(path: &str) -> Result<[u8; FILE_SIZE], Box<dyn std::error::Error>> {
 
-    let mut jpg_file = std::fs::File::open(path).unwrap();
+    let mut jpg_file = std::fs::File::open(path)?;
     let mut buffer: [u8; FILE_SIZE] = [0; FILE_SIZE];
-    let _ = jpg_file.read(&mut buffer).unwrap();
+    let _ = jpg_file.read(&mut buffer)?;
 
-    buffer
+    Ok(buffer)
 }
 
 pub fn top_bar() -> impl Widget<HelloState> + 'static {
