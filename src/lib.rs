@@ -5,7 +5,7 @@ use std::io::{Read, Write};
 use std::path::Path;
 use Database::FilmInDatabase;
 use serde::{Deserialize, Serialize};
-use druid::widget::{Align, Flex,TextBox, Button, Label, Scroll};
+use druid::widget::{Align, Flex,TextBox, Button, Label};
 use druid::{Data, Lens, Widget, WidgetExt, WindowConfig, Size, Command, Target, EventCtx, Env, ImageBuf};
 // use image;
 mod Film;
@@ -53,7 +53,7 @@ fn test_image(data: &HelloState) -> impl Widget<HelloState> + 'static {
 
 fn film_row(film: &FilmInDatabase) -> impl Widget<HelloState> + 'static {
 
-    let path = format!("media/{}.jpg",film.Title);
+    let path = format!("media/{}.jpg",film.Title.replace("?", ""));
     if !Path::new(&path).exists() {
         let _ = download_poster(&film, &path);
         //TODO: should add standard poster if this fails
