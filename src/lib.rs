@@ -77,9 +77,12 @@ fn film_row(film: &FilmInDatabase) -> impl Widget<HelloState> + 'static {
         .with_child(title)
         .with_child(genre);
 
-    Flex::row()
+    let row = Flex::row()
         .with_child(poster)
         .with_child(second_part)
+        .fix_width(800.);
+
+    row
 }
 
 fn get_placeholder() -> [u8; FILE_SIZE] {
