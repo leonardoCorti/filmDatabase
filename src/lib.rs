@@ -30,15 +30,12 @@ struct Config{
 
 pub fn homepage(state: &HelloState) -> impl Widget<HelloState> {
 
-    
-    let status_bar = TextBox::new()
-        .center()
-        .expand_width()
-        .lens(HelloState::status_bar);
-
+    let status: Label<HelloState> = Label::new(
+        |data: &HelloState, _env: &_| data.status_bar.clone()
+    );
 
     let layout = Flex::column()
-        .with_child(status_bar)
+        .with_child(status)
         .with_child(top_bar())
         .with_flex_child(movie_display(state), 1.0);
 
