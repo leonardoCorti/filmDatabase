@@ -141,7 +141,7 @@ pub fn top_bar() -> impl Widget<HelloState> + 'static {
             match &data.api_key{
                 Some(key) => {
                     data.status_bar = "searching film".into();
-                    let a_film_list = Film::search_film(&data.text_bar, key);
+                    let a_film_list = Film::search_film(&data.text_bar.trim(), key);
                     match a_film_list {
                         Ok(list) => {
                             let a_film = list.get_list()[0].clone();
