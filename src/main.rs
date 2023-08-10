@@ -1,4 +1,5 @@
 #![allow(non_snake_case)]
+#![windows_subsystem = "windows"]
 use druid::{WindowDesc, LocalizedString, AppLauncher};
 use filmDatabase::*;
 
