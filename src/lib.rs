@@ -20,6 +20,7 @@ pub struct HelloState {
     pub api_key: Option<String>,
     pub text_bar: String,
     pub database: Database::Database,
+    pub status_bar: String,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -29,7 +30,15 @@ struct Config{
 
 pub fn homepage(state: &HelloState) -> impl Widget<HelloState> {
 
+    
+    let status_bar = TextBox::new()
+        .center()
+        .expand_width()
+        .lens(HelloState::status_bar);
+
+
     let layout = Flex::column()
+        .with_child(status_bar)
         .with_child(top_bar())
         .with_flex_child(test_image(state), 1.0);
 
@@ -131,9 +140,19 @@ pub fn top_bar() -> impl Widget<HelloState> + 'static {
         .on_click(|ctx, data: &mut HelloState, env| {
             match &data.api_key{
                 Some(key) => {
-                    let a_film = Film::search_film(&data.text_bar, key).get_list()[0].clone();
-                    let a_film_info = Film::film_info(&a_film.imdbID, key);
-                    let _ = data.database.add_a_film(a_film_info);
+                    data.status_bar = "searching film".into();
+                    let a_film_list = Film::search_film(&data.text_bar, key);
+                    match a_film_list {
+                        Ok(list) => {
+                            let a_film = list.get_list()[0].clone();
+                            let a_film_info = Film::film_info(&a_film.imdbID, key);
+                            let _ = data.database.add_a_film(a_film_info);
+                            data.status_bar= "film added".into();
+                        }
+                        Err(_) => {
+                            data.status_bar= "film not found".into();
+                        }
+                    }
                      
                 },
                 None => request_api(ctx, data, env),

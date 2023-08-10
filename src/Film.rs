@@ -32,15 +32,15 @@ impl FilmList {
 }
 
 //TODO: add error handling
-pub fn search_film(name: &str, api: &str) -> FilmList {
+pub fn search_film(name: &str, api: &str) -> Result<FilmList, Box<dyn std::error::Error>> {
     let base_url = "http://www.omdbapi.com/";
     let url = format!("{}/?apikey={}&s={}",base_url,api,name.replace(" ", "%20") );
     println!("{}", url);
-    let response = reqwest::blocking::get(url).unwrap();
-    let response_string = response.text().unwrap();
+    let response = reqwest::blocking::get(url)?;
+    let response_string = response.text()?;
 
-    let results: FilmList = serde_json::from_str(&response_string).unwrap();
-    results
+    let results: FilmList = serde_json::from_str(&response_string)?;
+    Ok(results)
 }
 
 pub fn film_info(id: &str, api: &str) -> Film {

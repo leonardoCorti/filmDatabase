@@ -25,6 +25,7 @@ fn main() {
         api_key,
         text_bar: "".into(),
         database,
+        status_bar: "idle".into(),
     };
 
     let main_window = WindowDesc::new(homepage(&initial_state))
