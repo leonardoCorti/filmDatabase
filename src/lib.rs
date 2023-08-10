@@ -40,23 +40,19 @@ pub fn homepage(state: &HelloState) -> impl Widget<HelloState> {
     let layout = Flex::column()
         .with_child(status_bar)
         .with_child(top_bar())
-        .with_flex_child(test_image(state), 1.0);
+        .with_flex_child(movie_display(state), 1.0);
 
     Align::centered(layout)
 }
 
-fn test_image(data: &HelloState) -> impl Widget<HelloState> + 'static {
+fn movie_display(data: &HelloState) -> impl Widget<HelloState> + 'static {
 
 
     let mut column_of_films = Flex::column();
     for film in data.database.get_films(){
         column_of_films = column_of_films.with_child(film_row(&film));
     }
-    // column_of_films
-    // let scrollable = Scroll::new(column_of_films)
-    // .vertical();
-    // scrollable
-    let scrollable = column_of_films.scroll();
+   let scrollable = column_of_films.scroll();
 
     scrollable
 }
@@ -81,14 +77,16 @@ fn film_row(film: &FilmInDatabase) -> impl Widget<HelloState> + 'static {
 
     let title = Label::new(film.Title.clone());
     let genre = Label::new(film.Genre.clone());
+    let date_watched: Label<HelloState> = Label::new(format!("watched in date: {}", film.DateWatched.clone()));
     
     let second_part = Flex::column()
         .with_child(title)
-        .with_child(genre);
+        .with_child(genre)
+        .with_child(date_watched);
 
     let row = Flex::row()
         .with_child(poster)
-        .with_child(second_part)
+        .with_child(second_part.padding(10.))
         .fix_width(800.);
 
     row
