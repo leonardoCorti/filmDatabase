@@ -56,7 +56,8 @@ fn movie_display(data: &HelloState) -> impl Widget<HelloState> + 'static {
 
 fn film_row(film: &FilmInDatabase) -> impl Widget<HelloState> + 'static {
 
-    let mut path = format!("media/{}.jpg",film.Title.replace("?", ""));
+    let correct_title = remove_unsupported_characters(&film.Title);
+    let mut path = format!("media/{}.jpg",correct_title);
     if !Path::new(&path).exists() {
         let poster_downloaded = download_poster(&film, &path);
         if poster_downloaded.is_err() {
@@ -87,6 +88,14 @@ fn film_row(film: &FilmInDatabase) -> impl Widget<HelloState> + 'static {
         .fix_width(800.);
 
     row
+}
+
+fn remove_unsupported_characters(name: &str) -> String {
+    let invalid_chars = r#"\/:*?"<>|"#; // List of invalid characters
+
+    let correct_name = name.replace(|c| invalid_chars.contains(c), "");
+
+    correct_name
 }
 
 fn get_placeholder() -> [u8; FILE_SIZE] {
@@ -128,7 +137,7 @@ pub fn top_bar() -> impl Widget<HelloState> + 'static {
     let textbox = TextBox::new()
         .with_placeholder("What film did you watch?")
         .expand_width()
-        .lens(HelloState::text_bar);
+        .lens(HelloState::text_bar); 
 
     let button_quick_add = Button::new("search")
         .fix_width(100.)

@@ -1,4 +1,4 @@
-use std::{path::Path, fs::File, io::Write, result};
+use std::{path::Path, fs::File, io::Write};
 use chrono::prelude::*;
 
 use csv::ReaderBuilder;
