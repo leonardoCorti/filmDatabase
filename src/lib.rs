@@ -1,6 +1,6 @@
 #![allow(non_snake_case)]
 
-use std::fs::File;
+use std::fs::{File, self};
 use std::io::{Read, Write};
 use std::path::Path;
 use Database::FilmInDatabase;
@@ -57,6 +57,9 @@ fn movie_display(data: &HelloState) -> impl Widget<HelloState> + 'static {
 fn film_row(film: &FilmInDatabase) -> impl Widget<HelloState> + 'static {
 
     let correct_title = remove_unsupported_characters(&film.Title);
+    if !fs::metadata("media").is_ok() {
+        let _ = fs::create_dir("media");
+    }
     let mut path = format!("media/{}.jpg",correct_title);
     if !Path::new(&path).exists() {
         let poster_downloaded = download_poster(&film, &path);
